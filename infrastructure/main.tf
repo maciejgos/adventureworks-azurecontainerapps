@@ -87,6 +87,6 @@ resource "azurerm_app_service" "portal" {
   connection_string {
     name  = "Database"
     type  = "SQLServer"
-    value = "Server=tcp:adv-dbserver-43952.database.windows.net,1433;Initial Catalog=advdb;Persist Security Info=False;User ID=sqldbadmin;Password={your_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    value = "Server=tcp:${azurerm_mssql_server.mssql.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.advdb.name};Persist Security Info=False;User ID=${local.db_admin};Password=${local.db_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   }
 }
