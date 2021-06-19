@@ -54,4 +54,28 @@ jobs:
       - name: Build
         run: dotnet build ./src/AdventureWorksCore.sln --no-restore
       - name: Test
-        run: dotnet test ./src/AdventureWorksCore.sln --no-build --verbosity normal          
+        run: dotnet test ./src/AdventureWorksCore.sln --no-build --verbosity normal
+  infrastructure:
+    name: Infrastructure
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure/
+    steps:
+    - name: Setup Terraform
+      # You may pin to the exact commit or the version.
+      # uses: hashicorp/setup-terraform@d22444889af304a44b997011fbabb81ff705a7b4
+      uses: hashicorp/setup-terraform@v1.2.1
+      
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      continue-on-error: true
