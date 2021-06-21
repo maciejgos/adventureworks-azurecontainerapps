@@ -67,6 +67,12 @@ jobs:
       # uses: hashicorp/setup-terraform@d22444889af304a44b997011fbabb81ff705a7b4
       uses: hashicorp/setup-terraform@v1.2.1
       
+    - name: Azure Login
+      uses: Azure/login@v1.1
+      with:
+        # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+      
     - name: Terraform Init
       id: init
       run: terraform init
