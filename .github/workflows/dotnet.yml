@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     defaults:
       run:
         working-directory: ./src
@@ -59,12 +59,15 @@ jobs:
       - name: Test
         run: dotnet test AdventureWorksCore.sln --no-build --verbosity normal
   infrastructure:
-    name: Infrastructure
+    name: Terraform
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./infrastructure
+    needs: [build]
     steps:
+    - name: list
+      run: ls -l
     - name: Setup Terraform
       # You may pin to the exact commit or the version.
       # uses: hashicorp/setup-terraform@d22444889af304a44b997011fbabb81ff705a7b4
