@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  api:
+    build: ./AdventureWorksCore.Api
+    ports:
+        - 80:80
+        - 443:443
+    environment: 
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=https://+:443;http://+:80
+        - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd!
+        - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx        
+    volumes:
+        - ~/.aspnet/https:/https:ro
+    networks: 
+        - portal-vnet
+    depends_on: 
+        - db        
+  db:
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: P@ssw0rd!
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    healthcheck:
+        test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P P@ssw0rd! -Q 'SELECT 1' || exit 1"]
+        interval: 10s
+        retries: 10
+        start_period: 10s
+        timeout: 3s
+    ports:
+      - "1433:1433"
+    volumes: 
+      - .:/portal-data
+    networks: 
+      - portal-vnet
+
+networks: 
+  portal-vnet:
+
+volumes:
+  portal-data:
