@@ -6,6 +6,25 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AdventureWorksCore.Core\AdventureWorksCore.Core.csproj" />
+      <ProjectReference Include="..\AdventureWorksCore.Infrastructure\AdventureWorksCore.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Queries\" />
+      <None Remove="Models\" />
+      <None Remove="MediatR" />
+      <None Remove="MediatR.Extensions.Microsoft.DependencyInjection" />
+      <None Remove="Commands\" />
+      <None Remove="Models\Common\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Queries\" />
+      <Folder Include="Models\" />
+      <Folder Include="Commands\" />
+      <Folder Include="Models\Common\" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="MediatR" Version="9.0.0" />
+      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    </ItemGroup>
 </Project>

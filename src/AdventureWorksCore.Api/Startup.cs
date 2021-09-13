@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using AdventureWorksCore.Api.Application;
+using AdventureWorksCore.Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,6 +35,12 @@ namespace AdventureWorksCore.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "AdventureWorksCore.Api", Version = "v1"});
             });
+
+            services.AddApplication();
+
+            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddInfrastructure(connectionString);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

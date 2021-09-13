@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorksCore.Core", "AdventureWorksCore.Core\AdventureWorksCore.Core.csproj", "{1B1C25D8-DCDE-4D49-913D-D4C8E3E5070C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorksCore.Infrastructure", "AdventureWorksCore.Infrastructure\AdventureWorksCore.Infrastructure.csproj", "{7BC0073E-1690-4477-B6A0-E3485F732AC5}"
@@ -11,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorksCore.Api", "AdventureWorksCore.Api\AdventureWorksCore.Api.csproj", "{E587D148-0560-435E-87FD-C7F4EE314DC1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorksCore.Api.Application", "AdventureWorksCore.Api.Application\AdventureWorksCore.Api.Application.csproj", "{F8917A54-4AD7-43F0-B0DF-B7F3413E0D65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorksCore.Tests.Integration", "AdventureWorksCore.Tests.Integration\AdventureWorksCore.Tests.Integration.csproj", "{C0F5DED8-73B5-4BB2-B19C-8F8C4E99B295}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +45,9 @@ Global
 		{F8917A54-4AD7-43F0-B0DF-B7F3413E0D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8917A54-4AD7-43F0-B0DF-B7F3413E0D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8917A54-4AD7-43F0-B0DF-B7F3413E0D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0F5DED8-73B5-4BB2-B19C-8F8C4E99B295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0F5DED8-73B5-4BB2-B19C-8F8C4E99B295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0F5DED8-73B5-4BB2-B19C-8F8C4E99B295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0F5DED8-73B5-4BB2-B19C-8F8C4E99B295}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -54,7 +54,7 @@ jobs:
       - name: Build
         run: dotnet build .\src\AdventureWorksCore.sln --no-restore
       - name: Test
-        run: dotnet test .\src\AdventureWorksCore.sln --no-build --verbosity normal
+        run: dotnet test .\src\AdventureWorksCore.Tests\AdventureWorksCore.Tests.csproj --no-build --verbosity normal
   infrastructure:
     name: Terraform
     runs-on: ubuntu-latest
@@ -97,8 +97,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: [infrastructure]
     steps:
-      - name: Pause
-        run: sleep 10
+      #- name: Pause
+      #  run: sleep 10
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis      
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} 
+        name: Az login
+      - uses: Azure/get-keyvault-secrets@v1
+        id: keyvaultget
+        with:
+          keyvault: "candmdevadvkeyvault"
+          secrets: 'DefaultConnectionString'  # comma separated list of secret keys that need to be fetched from the Key Vault 
+        name: Get secrete
+      - name: Test
+        env:
+          CONNECTION_STRING: ${{ steps.keyvaultget.outputs.DefaultConnectionString }}
+        run: dotnet test ./src/AdventureWorksCore.Tests.Integration/AdventureWorksCore.Tests.Integration.csproj --no-build --verbosity normal
   cleanup_dev:
     name: 'Cleanup Dev'
     runs-on: ubuntu-latest
