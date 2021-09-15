@@ -1,0 +1,5 @@
+### Get products
+GET https://candmdevadvappservice.azurewebsites.net/api/products
+
+### Get product
+GET https://candmdevadvappservice.azurewebsites.net/api/products/1

@@ -1,0 +1,5 @@
+### Get products
+GET https://localhost:5001/api/products
+
+### Get product
+GET https://localhost:5001/api/products/1

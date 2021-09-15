@@ -11,7 +11,7 @@ terraform {
     storage_account_name = "advtfstatestorage001"
     container_name       = "tfstate"
     key                  = "dev-tfstate"
-  }
+  }  
 }
 
 provider "azurerm" {
@@ -46,15 +46,24 @@ resource "azurerm_mssql_server" "mssql" {
   version                      = "12.0"
   administrator_login          = local.db_admin
   administrator_login_password = local.db_password
+  minimum_tls_version          = 1.2
 }
 
-resource "azurerm_mssql_database" "advdb" {
-  name        = "advdb"
-  server_id   = azurerm_mssql_server.mssql.id
-  collation   = "SQL_Latin1_General_CP1_CI_AS"
-  sku_name    = "Basic"
-  sample_name = "AdventureWorksLT"
+resource "azurerm_sql_firewall_rule" "allow_all_azure_ips" {
+  name                = "AllowAllAzureIps"
+  resource_group_name = var.resourceGroupName
+  server_name         = azurerm_mssql_server.mssql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
 }
+
+#resource "azurerm_mssql_database" "advdb" {
+#  name        = "advdb"
+#  server_id   = azurerm_mssql_server.mssql.id
+#  collation   = "SQL_Latin1_General_CP1_CI_AS"
+#  sku_name    = "Basic"
+#  sample_name = "AdventureWorksLT"
+#}
 
 resource "azurerm_application_insights" "portal" {
   name                = format("%vadvappinsights", var.prefix)
@@ -64,7 +73,7 @@ resource "azurerm_application_insights" "portal" {
 }
 
 resource "azurerm_app_service_plan" "portal" {
-  name                = format("%vadvlinuxappserviceplan", var.prefix)
+  name                = format("%vadvappserviceplan", var.prefix)
   resource_group_name = var.resourceGroupName
   location            = var.location
   kind                = "Linux"
@@ -87,9 +96,9 @@ resource "azurerm_app_service" "portal" {
   }
 
   connection_string {
-    name  = "DefaultConnectionString"
+    name  = "ApplicationDbConnection"
     type  = "SQLServer"
-    value = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.portal.vault_uri}secrets/DefaultConnectionString)"
+    value = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.portal.vault_uri}secrets/ApplicationDbConnection)"
   }
 
   identity {
@@ -119,6 +128,7 @@ resource "azurerm_key_vault" "portal" {
     secret_permissions = [
       "Set",
       "Get",
+      "List",
       "Delete",
       "Purge",
       "Recover"
@@ -131,8 +141,8 @@ resource "azurerm_key_vault" "portal" {
 }
 
 resource "azurerm_key_vault_secret" "portal" {
-  name         = "DefaultConnectionString"
-  value        = "Server=tcp:${azurerm_mssql_server.mssql.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.advdb.name};Persist Security Info=False;User ID=${local.db_admin};Password=${local.db_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  name         = "ApplicationDbConnection"
+  value        = "Server=tcp:${azurerm_mssql_server.mssql.fully_qualified_domain_name},1433;Initial Catalog=advdb;Persist Security Info=False;User ID=${local.db_admin};Password=${local.db_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.portal.id
 }
 

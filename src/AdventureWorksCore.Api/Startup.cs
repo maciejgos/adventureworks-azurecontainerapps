@@ -38,7 +38,7 @@ namespace AdventureWorksCore.Api
 
             services.AddApplication();
 
-            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? Configuration.GetConnectionString("ApplicationDbConnection");
 
             services.AddInfrastructure(connectionString);
         }
