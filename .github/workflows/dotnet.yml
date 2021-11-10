@@ -111,11 +111,11 @@ jobs:
         id: keyvaultget
         with:
           keyvault: "candmdevadvkeyvault"
-          secrets: 'DefaultConnectionString'  # comma separated list of secret keys that need to be fetched from the Key Vault 
+          secrets: 'ApplicationDbConnection'  # comma separated list of secret keys that need to be fetched from the Key Vault 
         name: Get secrete
       - name: Test
         env:
-          CONNECTION_STRING: ${{ steps.keyvaultget.outputs.DefaultConnectionString }}
+          CONNECTION_STRING: ${{ steps.keyvaultget.outputs.ApplicationDbConnection }}
         run: dotnet test ./src/AdventureWorksCore.Tests.Integration/AdventureWorksCore.Tests.Integration.csproj --no-build --verbosity normal
   cleanup_dev:
     name: 'Cleanup Dev'
