@@ -57,14 +57,6 @@ resource "azurerm_sql_firewall_rule" "allow_all_azure_ips" {
   end_ip_address      = "0.0.0.0"
 }
 
-#resource "azurerm_mssql_database" "advdb" {
-#  name        = "advdb"
-#  server_id   = azurerm_mssql_server.mssql.id
-#  collation   = "SQL_Latin1_General_CP1_CI_AS"
-#  sku_name    = "Basic"
-#  sample_name = "AdventureWorksLT"
-#}
-
 resource "azurerm_application_insights" "portal" {
   name                = format("%vadvappinsights", var.prefix)
   resource_group_name = var.resourceGroupName
@@ -76,12 +68,9 @@ resource "azurerm_app_service_plan" "portal" {
   name                = format("%vadvappserviceplan", var.prefix)
   resource_group_name = var.resourceGroupName
   location            = var.location
-  kind                = "Linux"
-  reserved            = true
-
   sku {
-    tier = "Standard"
-    size = "B1"
+    tier = "Free"
+    size = "F1"
   }
 }
 
@@ -121,10 +110,6 @@ resource "azurerm_key_vault" "portal" {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
 
-    key_permissions = [
-      "Get",
-    ]
-
     secret_permissions = [
       "Set",
       "Get",
@@ -132,10 +117,6 @@ resource "azurerm_key_vault" "portal" {
       "Delete",
       "Purge",
       "Recover"
-    ]
-
-    storage_permissions = [
-      "Get",
     ]
   }
 }
@@ -156,10 +137,6 @@ resource "azurerm_key_vault_access_policy" "portalPolicy" {
     azurerm_key_vault.portal
   ]
 
-  key_permissions = [
-    "Get",
-  ]
-
   secret_permissions = [
     "Get",
   ]
@@ -169,10 +146,6 @@ resource "azurerm_key_vault_access_policy" "github" {
   key_vault_id = azurerm_key_vault.portal.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = "89dd788c-3865-4bb1-931b-7f6204870d6b"
-
-  key_permissions = [
-    "Get",
-  ]
 
   secret_permissions = [
     "Get",
