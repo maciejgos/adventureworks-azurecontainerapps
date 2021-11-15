@@ -2,15 +2,12 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.63.0"
+      version = "2.85.0"
     }
   }
 
   backend "azurerm" {
-    resource_group_name  = "rg-shared-resources"
-    storage_account_name = "advtfstatestorage001"
-    container_name       = "tfstate"
-    key                  = "dev-tfstate"
+
   }  
 }
 
@@ -18,56 +15,64 @@ provider "azurerm" {
   features {}
 }
 
-resource "random_integer" "random" {
-  min = 1
-  max = 50000
+data "azurerm_client_config" "current" {
+
 }
 
 // Random password generator
-resource "random_password" "random" {
+resource "random_password" "pwd" {
   length           = 16
   special          = true
   override_special = "_%@"
 }
 
-data "azurerm_client_config" "current" {
-
+locals {
+  prefix      = lower("advcore${substr(terraform.workspace, 0, 3)}")
+  db_admin    = "sqldbadmin"
+  db_password = random_password.pwd.result
 }
 
-locals {
-  db_admin    = "sqldbadmin"
-  db_password = random_password.random.result
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-advcore-westeurope-${substr(terraform.workspace, 0, 3)}"
+  location = "West Europe"
+
+  tags = {
+    "project"     = "Adventure Works Core"
+    "environment" = terraform.workspace
+  }
 }
 
 resource "azurerm_mssql_server" "mssql" {
-  name                         = format("%vadvdbserver", var.prefix)
-  resource_group_name          = var.resourceGroupName
-  location                     = var.location
+  name                         = "${local.prefix}dbserver"
+  resource_group_name          = azurerm_resource_group.rg.name
+  location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
   administrator_login          = local.db_admin
   administrator_login_password = local.db_password
   minimum_tls_version          = 1.2
+
+  tags = azurerm_resource_group.rg.tags
 }
 
 resource "azurerm_sql_firewall_rule" "allow_all_azure_ips" {
   name                = "AllowAllAzureIps"
-  resource_group_name = var.resourceGroupName
+  resource_group_name = azurerm_resource_group.rg.name
   server_name         = azurerm_mssql_server.mssql.name
   start_ip_address    = "0.0.0.0"
   end_ip_address      = "0.0.0.0"
 }
 
 resource "azurerm_application_insights" "portal" {
-  name                = format("%vadvappinsights", var.prefix)
-  resource_group_name = var.resourceGroupName
-  location            = var.location
+  name                = "${local.prefix}insights"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   application_type    = "web"
 }
 
 resource "azurerm_app_service_plan" "portal" {
-  name                = format("%vadvappserviceplan", var.prefix)
-  resource_group_name = var.resourceGroupName
-  location            = var.location
+  name                = "${local.prefix}plan"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   sku {
     tier = "Free"
     size = "F1"
@@ -75,9 +80,9 @@ resource "azurerm_app_service_plan" "portal" {
 }
 
 resource "azurerm_app_service" "portal" {
-  name                = format("%vadvappservice", var.prefix)
-  resource_group_name = var.resourceGroupName
-  location            = var.location
+  name                = "${local.prefix}app"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   app_service_plan_id = azurerm_app_service_plan.portal.id
 
   app_settings = {
@@ -96,9 +101,9 @@ resource "azurerm_app_service" "portal" {
 }
 
 resource "azurerm_key_vault" "portal" {
-  name                        = format("%vadvkeyvault", var.prefix)
-  location                    = var.location
-  resource_group_name         = var.resourceGroupName
+  name                        = "${local.prefix}vault"
+  location                    = azurerm_resource_group.rg.location
+  resource_group_name         = azurerm_resource_group.rg.name
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days  = 7
@@ -136,16 +141,6 @@ resource "azurerm_key_vault_access_policy" "portalPolicy" {
     azurerm_app_service.portal,
     azurerm_key_vault.portal
   ]
-
-  secret_permissions = [
-    "Get",
-  ]
-}
-
-resource "azurerm_key_vault_access_policy" "github" {
-  key_vault_id = azurerm_key_vault.portal.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = "89dd788c-3865-4bb1-931b-7f6204870d6b"
 
   secret_permissions = [
     "Get",
