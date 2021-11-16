@@ -3,3 +3,11 @@ GET https://localhost:5001/api/products
 
 ### Get product
 GET https://localhost:5001/api/products/1
+
+## Azure
+
+### Get products
+GET https://advcoredevapp.azurewebsites.net/api/products
+
+### Get product
+GET https://advcoredevapp.azurewebsites.net/api/products/1
