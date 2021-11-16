@@ -22,7 +22,7 @@ stages:
             displayName: Build
             inputs:
               command: build
-              workingDirectory: src
+              workingDirectory: src/backoffice/api
 
   - stage: Publish
     displayName: Publish
@@ -37,6 +37,7 @@ stages:
               publishWebProjects: true
               arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
               zipAfterPublish: true
+              workingDirectory: src/backoffice/api/AdventureWorksCore.Api
           - publish: $(Build.ArtifactStagingDirectory)
             displayName: 'Publish artifact'
             artifact: api-app            
