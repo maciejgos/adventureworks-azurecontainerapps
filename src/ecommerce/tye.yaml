@@ -1,0 +1,45 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+name: AdventureWorksCommerce
+ingress:
+  - name: ingress
+    bindings:
+      - port: 8080
+        protocol: https
+    rules:
+      - path: /api/products
+        service: products-api
+      - path: /api/cart
+        service: cart-api
+      - path: /api/order
+        service: order-api
+
+services:
+  # Cart API
+- name: cart-api
+  project: api/Cart/AdventureWorks.Cart.Api.csproj
+  bindings:
+    - port: 5001
+
+  # Orders API
+- name: order-api
+  project: api/Orders/AdventureWorks.Orders.Api.csproj
+  bindings:
+    - port: 5002
+
+  # Products API
+- name: products-api
+  project: api/Products/AdventureWorks.Products.Api.csproj
+  bindings:
+    - port: 5003
+
+  # Frontend
+- name: frontend
+  project: web/AdventureWorks.Ecommerce.Web.csproj
+  bindings:
+    - port: 5000
+      protocol: https

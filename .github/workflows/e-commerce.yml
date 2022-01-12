@@ -1,0 +1,71 @@
+name: E-Commerce Build and Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  
+env:
+  RESOURCE_GROUP: rg-advcore-westeurope-dev
+
+jobs:
+  build:  
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        services: [ {'imageName': 'cart-service', 'directory': './src/ecommerce/api/Cart'}, {'imageName': 'order-service', 'directory': './src/ecommerce/api/Orders'} , {'imageName': 'products-service', 'directory': './src/ecommerce/api/Products'}  ]
+    outputs:
+      containerImage-products: ${{ steps.image-tag.outputs.products-service }}
+      containerImage-cart: ${{ steps.image-tag.outputs.cart-service }}
+      containerImage-order: ${{ steps.image-tag.outputs.order-service }}    
+    steps:
+    - uses: actions/checkout@v2
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build ${{ matrix.services.directory }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ matrix.services.imageName }}:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ matrix.services.imageName }}:${{ github.sha }}
+    - name: 'Output image tag'
+      id: image-tag
+      run: echo "::set-output name=${{ matrix.services.imageName }}::${{ matrix.services.imageName }}:${{ github.sha }}"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+      - name: Deploy products app
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./infrastructure/ecommerce/products-app.json
+          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-products }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="${{ secrets.PRODUCTS_CONNECTION_STRING }}" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
+
+      - name: Deploy cart app
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./infrastructure/ecommerce/cart-app.json
+          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
+
+      - name: Deploy order app
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./infrastructure/ecommerce/order-app.json
+          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
