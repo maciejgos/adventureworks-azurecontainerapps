@@ -2,13 +2,9 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "2.85.0"
+      version = "2.99.0"
     }
   }
-
-  backend "azurerm" {
-
-  }  
 }
 
 provider "azurerm" {
@@ -33,7 +29,7 @@ locals {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-advcore-westeurope-${substr(terraform.workspace, 0, 3)}"
+  name     = "rg-advcore-containerapps"
   location = "West Europe"
 
   tags = {
@@ -49,7 +45,16 @@ resource "azurerm_mssql_server" "mssql" {
   version                      = "12.0"
   administrator_login          = local.db_admin
   administrator_login_password = local.db_password
-  minimum_tls_version          = 1.2
+  minimum_tls_version          = "1.2"
+
+  tags = azurerm_resource_group.rg.tags
+}
+
+resource "azurerm_mssql_database" "mssql" {
+  name        = "advdb"
+  server_id   = azurerm_mssql_server.mssql.id
+  sku_name    = "Basic"
+  sample_name = "AdventureWorksLT"
 
   tags = azurerm_resource_group.rg.tags
 }
