@@ -7,7 +7,7 @@ on:
     branches: [ main ]
   
 env:
-  RESOURCE_GROUP: rg-advcore-westeurope-dev
+  RESOURCE_GROUP: rg-advcore-containerapps
 
 jobs:
   build:  
