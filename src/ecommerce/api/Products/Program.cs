@@ -10,13 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentVariables();
 
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? "";
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<AdventureWorksDB>(opt => { 
+builder.Services.AddDbContext<AdventureWorksDB>(opt =>
+{
     opt.UseSqlServer(connectionString);
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -38,7 +39,7 @@ app.UseSwaggerUI();
 
 app.UseCors();
 
-app.MapGet("/", async (AdventureWorksDB db) => await db.Products.ToListAsync()).RequireCors("AnyOrigin");;
+app.MapGet("/", async (AdventureWorksDB db) => await db.Products.ToListAsync()).RequireCors("AnyOrigin"); ;
 
 app.Run();
 
@@ -53,7 +54,7 @@ class ProductApiModel
 class AdventureWorksDB : DbContext
 {
     public AdventureWorksDB(DbContextOptions<AdventureWorksDB> options)
-        : base(options) {}
+        : base(options) { }
 
     public DbSet<ProductApiModel> Products => Set<ProductApiModel>();
 
@@ -67,7 +68,7 @@ class ProductConfiguration : IEntityTypeConfiguration<ProductApiModel>
 {
     public void Configure(EntityTypeBuilder<ProductApiModel> builder)
     {
-        builder.ToTable("Product", "Production");
+        builder.ToTable("Product", "SalesLT");
         builder.HasKey(e => e.ProductID);
         builder.Property(e => e.ProductID).HasColumnName("ProductID").IsRequired();
         builder.Property(e => e.Name).IsRequired();
