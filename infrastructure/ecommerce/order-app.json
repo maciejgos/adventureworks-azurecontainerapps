@@ -20,57 +20,59 @@
     },
     "variables": {},
     "resources": [
-    {
-        "name": "order-app",
-        "type": "Microsoft.Web/containerApps",
-        "apiVersion": "2021-03-01",
-        "kind": "containerapp",
-        "location": "[parameters('location')]",
-        "properties": {
-            "kubeEnvironmentId": "[parameters('environment_id')]",
-            "configuration": {
-                "activeRevisionsMode": "multiple",
-                "secrets": [
-                {
-                    "name": "db-connection-string",
-                    "value": "[parameters('db-connection-string')]"
+        {
+            "name": "order-app",
+            "type": "Microsoft.Web/containerApps",
+            "apiVersion": "2021-03-01",
+            "kind": "containerapp",
+            "location": "[parameters('location')]",
+            "properties": {
+                "kubeEnvironmentId": "[parameters('environment_id')]",
+                "configuration": {
+                    "activeRevisionsMode": "multiple",
+                    "secrets": [
+                        {
+                            "name": "db-connection-string",
+                            "value": "[parameters('db-connection-string')]"
+                        },
+                        {
+                            "name": "advcoreregistry-pwd",
+                            "value": "[parameters('registry-password')]"
+                        }
+                    ],
+                    "registries": [
+                        {
+                            "server": "advcoreregistry.azurecr.io",
+                            "username": "advcoreregistry",
+                            "passwordSecretRef": "advcoreregistry-pwd"
+                        }
+                    ],
+                    "ingress": {
+                        "external": true,
+                        "targetPort": "80",
+                        "transport": "auto"
+                    }
                 },
-                {
-                    "name": "advcoredevazurecrio-advcoredev-pwd",
-                    "value": "[parameters('registry-password')]"
-                }],
-                "registries": [
-                    {
-                        "server": "advcoredev.azurecr.io",
-                        "username": "advcoredev",
-                        "passwordSecretRef": "advcoredevazurecrio-advcoredev-pwd"
+                "template": {
+                    "containers": [
+                        {
+                            "image": "[parameters('imageName')]",
+                            "name": "order-app",
+                            "env": [
+                                {
+                                    "name": "CONNECTION_STRING",
+                                    "secretref": "db-connection-string"
+                                }
+                            ]
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 0,
+                        "maxReplicas": 5,
+                        "rules": []
                     }
-                ],
-                "ingress": {
-                    "external": true,
-                    "targetPort": "80",
-                    "transport": "auto"
-                }
-            },
-            "template": {
-                "containers": [
-                    {
-                        "image": "[parameters('imageName')]",
-                        "name": "order-app",
-                        "env": [
-                            {
-                                "name": "CONNECTION_STRING",
-                                "secretref": "db-connection-string"
-                            }
-                        ]
-                    }
-                ],
-                "scale": {
-                    "minReplicas": 0,
-                    "maxReplicas": 5,
-                    "rules": []
                 }
             }
         }
-    }]
+    ]
 }
