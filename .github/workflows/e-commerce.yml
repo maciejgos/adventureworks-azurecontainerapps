@@ -38,34 +38,34 @@ jobs:
       id: image-tag
       run: echo "::set-output name=${{ matrix.services.imageName }}::${{ matrix.services.imageName }}:${{ github.sha }}"
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
     
-    steps:
-      - uses: actions/checkout@v2
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Azure Login
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
         
-      - name: Deploy products app
-        uses: azure/arm-deploy@v1
-        with:
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./infrastructure/ecommerce/products-app.json
-          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-products }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="${{ secrets.PRODUCTS_CONNECTION_STRING }}" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
+  #     - name: Deploy products app
+  #       uses: azure/arm-deploy@v1
+  #       with:
+  #         resourceGroupName: ${{ env.RESOURCE_GROUP }}
+  #         template: ./infrastructure/ecommerce/products-app.json
+  #         parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-products }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="${{ secrets.PRODUCTS_CONNECTION_STRING }}" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
 
-      - name: Deploy cart app
-        uses: azure/arm-deploy@v1
-        with:
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./infrastructure/ecommerce/cart-app.json
-          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
+  #     - name: Deploy cart app
+  #       uses: azure/arm-deploy@v1
+  #       with:
+  #         resourceGroupName: ${{ env.RESOURCE_GROUP }}
+  #         template: ./infrastructure/ecommerce/cart-app.json
+  #         parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
 
-      - name: Deploy order app
-        uses: azure/arm-deploy@v1
-        with:
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./infrastructure/ecommerce/order-app.json
-          parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
+  #     - name: Deploy order app
+  #       uses: azure/arm-deploy@v1
+  #       with:
+  #         resourceGroupName: ${{ env.RESOURCE_GROUP }}
+  #         template: ./infrastructure/ecommerce/order-app.json
+  #         parameters: imageName=${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ needs.build.outputs.containerImage-cart }} environment_id=${{ secrets.APP_ENVIRONMENT_ID }} db-connection-string="" registry-password=${{ secrets.REGISTRY_PASSWORD }} location="northeurope"
